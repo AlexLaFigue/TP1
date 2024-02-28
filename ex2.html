@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <div id="app">
+        <h1>Products</h1>
+        <div v-for="i in produit" :key="i.id">
+            <h2>{{ i.nom}} <span v-if="i.etat=='unvailable'">{{i.etat}}</span> </h2>
+            <p>Price: {{i.prix}}.- </p>
+            <p>Id: {{ i.id}}</p>
+            <br>
+            
+        </div>
+
+    
+    </div>
+
+    
+</body>
+
+<script type="module">
+    import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+    createApp({
+        data(){
+            return {
+                produit: [
+                    {id: 1, nom: "iPhone", prix: 1100, etat: "vailable"},
+                    {id: 2, nom: "Samsung Galaxy", prix: 999, etat: "vailable"},
+                    {id: 3, nom: "Surface Duo", prix: 1399, etat: "unvailable"}
+                ]
+            }
+        },
+
+    }).mount('#app')
+    
+        
+    
+          
+        </script>
+</html>

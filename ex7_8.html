@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Static Template</title>
+</head>
+<body id="app" class="container">
+  <h2>Products</h2>
+  <div class="input-group mb-3">
+    <input type="text" v-model="id" placeholder="ID">
+    <input type="text" v-model="title" placeholder="Title">
+    <input type="text" v-model="price" placeholder="Price">
+    <button @click="add">Add</button>
+  </div>
+
+  <input type="text" v-model="textFilter" placeholder="Search">
+  <input type="checkbox" v-model="availableFilter">
+  <label>Available</label>
+  <select v-model="selectedSort">
+    <option value="name">Name</option>
+    <option value="price">Price</option>
+  </select>
+
+  <div v-for="product in filteredAndSortedProducts" :key="product.id">
+    <img :src="product.thumbnail">
+    <div>
+      <h3>{{product.title}}
+        <span v-if="product.stock >= 1">Available</span>
+        <span v-else>Not available</span>
+      </h3>
+      <p>Price: {{product.price}}.-</p>
+      <p>Stock: {{product.stock}}.-</p>
+      <p>{{product.description}}</p>
+      <button @click="addToCart(product)" v-if="product.stock >= 1">Add to Cart</button>
+    </div>
+  </div>
+
+  <h2>Cart</h2>
+  <ul>
+    <li v-for="(product, index) in cart" :key="product.id">
+      {{product.title}} <input type="number" min="1" v-model="cart[index].quantity"> x {{product.price}}.= {{product.totalPrice}}.-
+      <button @click="removeToCart(index)">Remove</button>
+    </li>
+  </ul>
+  <p>You have {{totalCartItems}} items for a total of {{totalCart}}.-</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.5/axios.js" integrity="sha512-NF+M0CTEn9D9ENLJG/DxMiqAiaz3upEpfxyekwb+U2OG8JPJSh/bUgXToRtxoNW5A2ucCUCw7adbo3gU1ZdHUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module">
+    import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+    createApp({
+      data() {
+        return {
+          id: null,
+          title: "",
+          price: null,
+          textFilter: "",
+          availableFilter: true,
+          selectedSort: "",
+          products: [],
+          cart: []
+        }
+      },
+
+      mounted() {
+        this.fetchData();
+      },
+
+      watch: {
+        textFilter: 'updateAndFilterData'
+      },
+
+      methods: {
+        async fetchData() {
+          try {
+            const response = await axios.get('https://dummyjson.com/products');
+            this.products = response.data.products;
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+
+        async updateAndFilterData(){
+          try {
+            const response = await axios.get('https://dummyjson.com/products/search?q=' + this.textFilter);
+            this.products = response.data.products;
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+
+        add(){
+          this.products.push({
+            id: this.id,
+            title: this.title,
+            price: this.price,
+            available: true
+          });
+          this.id = null;
+          this.title = "";
+          this.price = null;
+        },
+
+        addToCart(product){
+          let productInCart = this.cart.find(productInCart => productInCart.id === product.id)
+          if(productInCart != undefined){
+            productInCart.quantity++
+            productInCart.totalPrice += product.price
+          } else{
+            this.cart.push({
+              id: product.id,
+              title: product.title,
+              price: product.price,
+              quantity: 1,
+              totalPrice: product.price
+            })
+          }
+        },
+
+        removeToCart(index){
+          this.cart.splice(index, 1)
+        }
+      },
+
+      computed: {
+        filteredAndSortedProducts(){
+          return this.products
+            .filter(product => this.availableFilter ? product.stock > 1 : true)
+            .sort((a, b) => this.selectedSort === "price" ? a.price - b.price : a.title.localeCompare(b.title))
+        },
+
+        totalCart(){
+          return this.cart.reduce((acc, product) => acc + (product.price * product.quantity), 0);
+        },
+
+        totalCartItems(){
+          return this.cart.reduce((acc, product) => acc + product.quantity, 0);
+        }
+      }
+    }).mount("#app");
+  </script>
+</body>
+</html>
