@@ -1,140 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Static Template</title>
+  <title>Modèle Statique</title>
 </head>
 <body id="app" class="container">
-  <h2>Products</h2>
+  <h2>Produits</h2>
   <div class="input-group mb-3">
-    <input type="text" v-model="id" placeholder="ID">
-    <input type="text" v-model="title" placeholder="Title">
-    <input type="text" v-model="price" placeholder="Price">
-    <button @click="add">Add</button>
+    <input type="text" v-model="identifiant" placeholder="Identifiant">
+    <input type="text" v-model="titre" placeholder="Titre">
+    <input type="text" v-model="prix" placeholder="Prix">
+    <button @click="ajouter">Ajouter</button>
   </div>
 
-  <input type="text" v-model="textFilter" placeholder="Search">
-  <input type="checkbox" v-model="availableFilter">
-  <label>Available</label>
-  <select v-model="selectedSort">
-    <option value="name">Name</option>
-    <option value="price">Price</option>
+  <input type="text" v-model="filtreTexte" placeholder="Recherche">
+  <input type="checkbox" v-model="filtreDisponible">
+  <label>Disponible</label>
+  <select v-model="triSelectionné">
+    <option value="nom">Nom</option>
+    <option value="prix">Prix</option>
   </select>
 
-  <div v-for="product in filteredAndSortedProducts" :key="product.id">
-    <img :src="product.thumbnail">
+  <div v-for="produit in produitsFiltrésEtTriés" :key="produit.id">
+    <img :src="produit.miniature">
     <div>
-      <h3>{{product.title}}
-        <span v-if="product.stock >= 1">Available</span>
-        <span v-else>Not available</span>
+      <h3>{{produit.titre}}
+        <span v-if="produit.stock >= 1">Disponible</span>
+        <span v-else>Non disponible</span>
       </h3>
-      <p>Price: {{product.price}}.-</p>
-      <p>Stock: {{product.stock}}.-</p>
-      <p>{{product.description}}</p>
-      <button @click="addToCart(product)" v-if="product.stock >= 1">Add to Cart</button>
+      <p>Prix : {{produit.prix}}.-</p>
+      <p>Stock : {{produit.stock}}.-</p>
+      <p>{{produit.description}}</p>
+      <button @click="ajouterAuPanier(produit)" v-if="produit.stock >= 1">Ajouter au panier</button>
     </div>
   </div>
 
-  <h2>Cart</h2>
+  <h2>Panier</h2>
   <ul>
-    <li v-for="(product, index) in cart" :key="product.id">
-      {{product.title}} <input type="number" min="1" v-model="cart[index].quantity"> x {{product.price}}.= {{product.totalPrice}}.-
-      <button @click="removeToCart(index)">Remove</button>
+    <li v-for="(produit, index) in panier" :key="produit.id">
+      {{produit.titre}} <input type="number" min="1" v-model="panier[index].quantité"> x {{produit.prix}}.= {{produit.prixTotal}}.-
+      <button @click="retirerDuPanier(index)">Retirer</button>
     </li>
   </ul>
-  <p>You have {{totalCartItems}} items for a total of {{totalCart}}.-</p>
+  <p>Vous avez {{totalArticlesPanier}} articles pour un total de {{totalPanier}}.-</p>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.5/axios.js" integrity="sha512-NF+M0CTEn9D9ENLJG/DxMiqAiaz3upEpfxyekwb+U2OG8JPJSh/bUgXToRtxoNW5A2ucCUCw7adbo3gU1ZdHUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script type="module">
     import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
     createApp({
       data() {
         return {
-          id: null,
-          title: "",
-          price: null,
-          textFilter: "",
-          availableFilter: true,
-          selectedSort: "",
-          products: [],
-          cart: []
+          identifiant: null,
+          titre: "",
+          prix: null,
+          filtreTexte: "",
+          filtreDisponible: true,
+          triSelectionné: "",
+          produits: [],
+          panier: []
         }
       },
 
       mounted() {
-        this.fetchData();
+        this.récupérerDonnées();
       },
 
       watch: {
-        textFilter: 'updateAndFilterData'
+        filtreTexte: 'mettreAJourEtFiltrerDonnées'
       },
 
       methods: {
-        async fetchData() {
+        async récupérerDonnées() {
           try {
-            const response = await axios.get('https://dummyjson.com/products');
-            this.products = response.data.products;
-          } catch (error) {
-            console.error('Error fetching data:', error);
+            const réponse = await axios.get('https://dummyjson.com/products');
+            this.produits = réponse.data.products;
+          } catch (erreur) {
+            console.error('Erreur lors de la récupération des données :', erreur);
           }
         },
 
-        async updateAndFilterData(){
+        async mettreAJourEtFiltrerDonnées(){
           try {
-            const response = await axios.get('https://dummyjson.com/products/search?q=' + this.textFilter);
-            this.products = response.data.products;
-          } catch (error) {
-            console.error('Error fetching data:', error);
+            const réponse = await axios.get('https://dummyjson.com/products/search?q=' + this.filtreTexte);
+            this.produits = réponse.data.products;
+          } catch (erreur) {
+            console.error('Erreur lors de la récupération des données :', erreur);
           }
         },
 
-        add(){
-          this.products.push({
-            id: this.id,
-            title: this.title,
-            price: this.price,
-            available: true
+        ajouter(){
+          this.produits.push({
+            id: this.identifiant,
+            titre: this.titre,
+            prix: this.prix,
+            disponible: true
           });
-          this.id = null;
-          this.title = "";
-          this.price = null;
+          this.identifiant = null;
+          this.titre = "";
+          this.prix = null;
         },
 
-        addToCart(product){
-          let productInCart = this.cart.find(productInCart => productInCart.id === product.id)
-          if(productInCart != undefined){
-            productInCart.quantity++
-            productInCart.totalPrice += product.price
+        ajouterAuPanier(produit){
+          let produitDansPanier = this.panier.find(produitDansPanier => produitDansPanier.id === produit.id)
+          if(produitDansPanier != undefined){
+            produitDansPanier.quantité++
+            produitDansPanier.prixTotal += produit.prix
           } else{
-            this.cart.push({
-              id: product.id,
-              title: product.title,
-              price: product.price,
-              quantity: 1,
-              totalPrice: product.price
+            this.panier.push({
+              id: produit.id,
+              titre: produit.titre,
+              prix: produit.prix,
+              quantité: 1,
+              prixTotal: produit.prix
             })
           }
         },
 
-        removeToCart(index){
-          this.cart.splice(index, 1)
+        retirerDuPanier(index){
+          this.panier.splice(index, 1)
         }
       },
 
       computed: {
-        filteredAndSortedProducts(){
-          return this.products
-            .filter(product => this.availableFilter ? product.stock > 1 : true)
-            .sort((a, b) => this.selectedSort === "price" ? a.price - b.price : a.title.localeCompare(b.title))
+        produitsFiltrésEtTriés(){
+          return this.produits
+            .filter(produit => this.filtreDisponible ? produit.stock > 1 : true)
+            .sort((a, b) => this.triSelectionné === "prix" ? a.prix - b.prix : a.titre.localeCompare(b.titre))
         },
 
-        totalCart(){
-          return this.cart.reduce((acc, product) => acc + (product.price * product.quantity), 0);
+        totalPanier(){
+          return this.panier.reduce((acc, produit) => acc + (produit.prix * produit.quantité), 0);
         },
 
-        totalCartItems(){
-          return this.cart.reduce((acc, product) => acc + product.quantity, 0);
+        totalArticlesPanier(){
+          return this.panier.reduce((acc, produit) => acc + produit.quantité, 0);
         }
       }
     }).mount("#app");
